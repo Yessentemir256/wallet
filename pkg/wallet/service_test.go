@@ -7,7 +7,7 @@ import (
 )
 
 func TestService_FindAccountByID_success(t *testing.T) {
-	// Создаем тестовый аккаунт
+	// Создаем сервис с тестовым аккаунтом
 	testAccount := &types.Account{ID: 123, Balance: 1000}
 	s := &Service{
 		accounts: []*types.Account{testAccount},
@@ -21,10 +21,9 @@ func TestService_FindAccountByID_success(t *testing.T) {
 	if foundAccount != testAccount {
 		t.Errorf("Expected account %v, but got %v", testAccount, foundAccount)
 	}
-
 }
 
-func TestService_FindAccountByID_notFoundAlternative(t *testing.T) {
+func TestService_FindAccountByID_notFound(t *testing.T) {
 	// Создаем сервис без аккаунтов
 	s := &Service{
 		accounts: []*types.Account{},
