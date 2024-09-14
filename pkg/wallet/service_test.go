@@ -39,3 +39,63 @@ func TestService_FindAccountByID_notFound(t *testing.T) {
 		t.Errorf("Expected 'account not found' error, but got %v", err)
 	}
 }
+
+func TestReject(t *testing.T) {
+	s := &Service{
+		payments: []*types.Payment{
+			{ID: "1", AccountID: 1, Amount: 100, Category: "Test", Status: types.PaymentStatusOk},
+		},
+		accounts: []*types.Account{
+			{ID: 1, Balance: 0},
+		},
+	}
+
+	err := s.Reject("1")
+	if err != nil {
+		t.Errorf("Expected nil error, got %v", err)
+	}
+
+	// Check if payment status is updated
+	if s.payments[0].Status != types.PaymentStatusFail {
+		t.Errorf("Payment status not updated")
+	}
+
+	// Check if funds are added back to the account
+	if s.accounts[0].Balance != 100 {
+		t.Errorf("Funds not added back to account")
+	}
+}
+
+func TestFindPaymentByID(t *testing.T) {
+	s := &Service{
+		payments: []*types.Payment{
+			{ID: "1", AccountID: 1, Amount: 100, Category: "Test", Status: types.PaymentStatusOk},
+		},
+	}
+
+	payment, err := s.FindPaymentByID("1")
+	if err != nil {
+		t.Errorf("Expected nil error, got %v", err)
+	}
+
+	if payment.ID != "1" {
+		t.Errorf("Incorrect payment found")
+	}
+}
+
+func TestAddFundsToAccount(t *testing.T) {
+	s := &Service{
+		accounts: []*types.Account{
+			{ID: 1, Balance: 0},
+		},
+	}
+
+	err := s.addFundsToAccount(1, 100)
+	if err != nil {
+		t.Errorf("Expected nil error, got %v", err)
+	}
+
+	if s.accounts[0].Balance != 100 {
+		t.Errorf("Funds not added to account")
+	}
+}
