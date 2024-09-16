@@ -82,20 +82,3 @@ func TestFindPaymentByID(t *testing.T) {
 		t.Errorf("Incorrect payment found")
 	}
 }
-
-func TestAddFundsToAccount(t *testing.T) {
-	s := &Service{
-		accounts: []*types.Account{
-			{ID: 1, Balance: 0},
-		},
-	}
-
-	err := s.addFundsToAccount(1, 100)
-	if err != nil {
-		t.Errorf("Expected nil error, got %v", err)
-	}
-
-	if s.accounts[0].Balance != 100 {
-		t.Errorf("Funds not added to account")
-	}
-}

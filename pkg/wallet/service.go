@@ -107,12 +107,10 @@ func (s *Service) FindAccountByID(accountID int64) (*types.Account, error) {
 }
 
 func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error) {
-	var paymentReturn *types.Payment
 
 	for _, payment := range s.payments {
 		if payment.ID == paymentID {
-			paymentReturn = payment
-			return paymentReturn, nil
+			return payment, nil
 		}
 	}
 
@@ -120,27 +118,18 @@ func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error) {
 
 }
 
-func (s *Service) addFundsToAccount(accountID int64, amount types.Money) error {
-	for _, acc := range s.accounts {
-		if acc.ID == accountID {
-			acc.Balance += amount
-			return nil
-		}
-	}
-	return ErrAccountNotFound
-}
-
 func (s *Service) Reject(paymentID string) error {
-	foundPayment, err := s.FindPaymentByID(paymentID)
-	if err != nil {
-		return ErrPaymentNotFound
-	}
-
-	foundPayment.Status = types.PaymentStatusFail
-	err = s.addFundsToAccount(foundPayment.AccountID, foundPayment.Amount)
+	payment, err := s.FindPaymentByID(paymentID)
 	if err != nil {
 		return err
 	}
+	account, err := s.FindAccountByID(payment.AccountID)
+	if err != nil {
+		return err
+	}
+
+	payment.Status = types.PaymentStatusFail
+	account.Balance += payment.Amount
 	return nil
 
 }
