@@ -3,10 +3,11 @@ package wallet
 import (
 	"errors"
 	"fmt"
-	"github.com/Yessentemir256/wallet/pkg/types"
-	"github.com/google/uuid"
 	"reflect"
 	"testing"
+
+	"github.com/Yessentemir256/wallet/pkg/types"
+	"github.com/google/uuid"
 )
 
 func TestService_FindAccountByID_success(t *testing.T) {
@@ -86,14 +87,6 @@ func TestFindPaymentByID(t *testing.T) {
 	}
 }
 
-type testService struct {
-	*Service // embedding (встраивание)
-}
-
-func newTestService() *testService {
-	return &testService{Service: &Service{}} //функция-конструктор
-}
-
 func (s *testService) addAccountWithBalance(phone types.Phone, balance types.Money) (*types.Account, error) {
 	// регистрируем там пользователя
 	account, err := s.RegisterAccount(phone)
@@ -156,6 +149,14 @@ func TestService_FindPaymentByID_fail(t *testing.T) {
 	}
 }
 
+type testService struct {
+	*Service // embedding (встраивание)
+}
+
+func newTestService() *testService {
+	return &testService{Service: &Service{}} //функция-конструктор
+}
+
 type testAccount struct {
 	phone    types.Phone
 	balance  types.Money
@@ -205,15 +206,15 @@ func (s *testService) addAccount(data testAccount) (*types.Account, []*types.Pay
 
 func TestService_Reject_success(t *testing.T) {
 	// создаем сервис
-	s := newTestService()
-	_, payments, err := s.addAccount(defaultTestAccount)
+	s := newTestService()                                // это наша функция конструктор, которая вышла из embedding
+	_, payments, err := s.addAccount(defaultTestAccount) // добавление пользователя с помощью метода который принадлежит testService
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
 	// пробуем отменить платеж
-	payment := payments[0]
+	payment := payments[0] // выбираем конкретно платеж который в итоге хотим итменить
 	err = s.Reject(payment.ID)
 	if err != nil {
 		t.Errorf("Reject(): error = %v", err)
@@ -239,4 +240,35 @@ func TestService_Reject_success(t *testing.T) {
 		t.Errorf("Reject(): balance didn't changed, account = %v", savedAccount)
 		return
 	}
+}
+
+func TestService_Repeat_success(t *testing.T) {
+	// создаем сервис
+	s := newTestService()                                // это наша функция конструктор, которая вышла из embedding
+	_, payments, err := s.addAccount(defaultTestAccount) // добавление пользователя с помощью метода который принадлежит testService
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// пробуем повторить платеж
+	payment := payments[0] // выбираем конкретно платеж который в итоге хотим повторить
+	paymentRepeated, err := s.Repeat(payment.ID)
+	if err != nil {
+		t.Errorf("Repeat(): error = %v", err)
+		return
+	}
+
+	// проверка на то что id разные
+	if payment.ID == paymentRepeated.ID {
+		t.Errorf("Repeat(): ID is not different, paymentID = %v", payment.ID)
+		return
+	}
+
+	// проверка на то что id разные
+	if payment.Amount != paymentRepeated.Amount {
+		t.Errorf("Repeat(): amount is not equal, paymentID = %v", payment.ID)
+		return
+	}
+
 }
