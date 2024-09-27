@@ -265,10 +265,41 @@ func TestService_Repeat_success(t *testing.T) {
 		return
 	}
 
-	// проверка на то что id разные
+	// проверка на то что суммы одинковые
 	if payment.Amount != paymentRepeated.Amount {
 		t.Errorf("Repeat(): amount is not equal, paymentID = %v", payment.ID)
 		return
 	}
 
+}
+
+func TestService_FavoritePayment_success(t *testing.T) {
+	// создаем сервис
+	s := newTestService()                                // это наша функция конструктор, которая вышла из embedding
+	_, payments, err := s.addAccount(defaultTestAccount) // добавление пользователя с помощью метода который принадлежит testService
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// пробуем
+	payment := payments[0] // выбираем конкретно платеж который в итоге хотим сделать избранным.
+	var name string
+	favorite, err := s.FavoritePayment(payment.ID, name)
+	if err != nil {
+		t.Errorf("FavoritePayment(): error = %v", err)
+		return
+	}
+
+	// проверка на то что id разные.
+	if payment.ID != favorite.ID {
+		t.Errorf("FavoritePayment(): ID is equal, paymentID = %v", payment.ID)
+		return
+	}
+
+	// проверка на то что суммы одинковые
+	if payment.Amount != favorite.Amount {
+		t.Errorf("Repeat(): amount is not equal, paymentID = %v", payment.ID)
+		return
+	}
 }

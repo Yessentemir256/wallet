@@ -149,3 +149,30 @@ func (s *Service) Repeat(paymentID string) (*types.Payment, error) {
 	return repeated, nil
 
 }
+
+// FavoritePayment создает избранное из конретного платежа.
+func (s *Service) FavoritePayment(paymentID string, name string) (*types.Favorite, error) {
+	// находим платеж
+	payment, err := s.FindPaymentByID(paymentID)
+	if err != nil {
+		return nil, ErrPaymentNotFound
+	}
+
+	// находим аккаунт
+	account, err := s.FindAccountByID(payment.AccountID)
+	if err != nil {
+		return nil, ErrAccountNotFound
+	}
+
+	favorite := &types.Favorite{
+		ID:        paymentID,
+		AccountID: account.ID,
+		Name:      name,
+		Amount:    payment.Amount,
+		Category:  payment.Category,
+	}
+	s.favorites = append(s.favorites, favorite)
+
+	return favorite, nil
+
+}
