@@ -119,6 +119,18 @@ func (s *Service) FindPaymentByID(paymentID string) (*types.Payment, error) {
 
 }
 
+func (s *Service) FindFavoritePaymentByID(paymentID string) (*types.Favorite, error) {
+
+	for _, favorite := range s.favorites {
+		if favorite.ID == paymentID {
+			return favorite, nil
+		}
+	}
+
+	return nil, ErrPaymentNotFound
+
+}
+
 func (s *Service) Reject(paymentID string) error {
 	payment, err := s.FindPaymentByID(paymentID)
 	if err != nil {
@@ -172,6 +184,22 @@ func (s *Service) FavoritePayment(paymentID string, name string) (*types.Favorit
 		Category:  payment.Category,
 	}
 	s.favorites = append(s.favorites, favorite)
+
+	return favorite, nil
+
+}
+
+// PayFromFavorite совершает платеж из избранного.
+func (s *Service) PayFromFavorite(favoriteID string) (*types.Payment, error) {
+	payment, err := s.FindFavoritePaymentByID(favoriteID)
+	if err != nil {
+		return nil, ErrPaymentNotFound
+	}
+
+	favorite, err := s.Pay(payment.AccountID, payment.Amount, payment.Category)
+	if err != nil {
+		return nil, err
+	}
 
 	return favorite, nil
 

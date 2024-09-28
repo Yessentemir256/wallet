@@ -284,8 +284,7 @@ func TestService_FavoritePayment_success(t *testing.T) {
 
 	// пробуем
 	payment := payments[0] // выбираем конкретно платеж который в итоге хотим сделать избранным.
-	var name string
-	favorite, err := s.FavoritePayment(payment.ID, name)
+	favorite, err := s.FavoritePayment(payment.ID, "name")
 	if err != nil {
 		t.Errorf("FavoritePayment(): error = %v", err)
 		return
@@ -297,9 +296,41 @@ func TestService_FavoritePayment_success(t *testing.T) {
 		return
 	}
 
-	// проверка на то что суммы одинковые
+	// проверка на то что суммы одинаковые
 	if payment.Amount != favorite.Amount {
 		t.Errorf("Repeat(): amount is not equal, paymentID = %v", payment.ID)
 		return
 	}
+}
+
+func TestService_PayFromFavorite_success(t *testing.T) {
+	// создаем сервис
+	s := newTestService()                                // это наша функция конструктор, которая вышла из embedding
+	_, payments, err := s.addAccount(defaultTestAccount) // добавление пользователя с помощью метода который принадлежит testService
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// пробуем отменить платеж
+	payment := payments[0] // выбираем конкретно платеж который который хотим сделать избранным
+
+	favorite, err := s.FavoritePayment(payment.ID, "name")
+	if err != nil {
+		t.Errorf("FavoritePayment(): error = %v", err)
+		return
+	}
+
+	newPaymentFromFavorite, err := s.PayFromFavorite(favorite.ID)
+	if err != nil {
+		t.Errorf("PayFromFavorite(): can't pay from favorites, error = %v", err)
+		return
+	}
+
+	// проверка на то что суммы одинаковые
+	if payment.Amount != newPaymentFromFavorite.Amount {
+		t.Errorf("FavoritePayment(): amount is not equal, paymentID = %v", payment.ID)
+		return
+	}
+
 }
