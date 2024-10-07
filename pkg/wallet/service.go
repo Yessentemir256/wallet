@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var ErrPhoneRegistered = errors.New("phone already registered")
@@ -224,6 +225,24 @@ func (s *Service) ExportToFile(path string) error {
 		_, err = file.WriteString(accountStr)
 		if err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Service) ImportFromFile(path string) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	records := strings.Split(string(data), "\n")
+	for _, record := range records {
+		fields := strings.Split(record, ";")
+		// Обработка каждого поля
+		for _, field := range fields {
+			log.Print(field)
 		}
 	}
 
