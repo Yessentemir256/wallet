@@ -1,7 +1,13 @@
 package types
 
+import "strconv"
+
 // Money представляет собой денежную сумму в минимальных единицах (центы, копейки, дирамы и.т.д).
 type Money int64
+
+func (m Money) String() string {
+	return strconv.FormatInt(int64(m), 10)
+}
 
 // PaymentCategory представляет собой категорию, в которой был совершен платеж (авто, аптеки, рестораны и.т.д.).
 type PaymentCategory string
@@ -26,6 +32,10 @@ type Payment struct {
 }
 
 type Phone string
+
+func (p Phone) String() string {
+	return string(p)
+}
 
 // Account представляет информацию о счёте пользователя.
 type Account struct {

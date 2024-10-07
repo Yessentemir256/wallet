@@ -2,9 +2,11 @@ package wallet
 
 import (
 	"errors"
-
 	"github.com/Yessentemir256/wallet/pkg/types"
 	"github.com/google/uuid"
+	"log"
+	"os"
+	"strconv"
 )
 
 var ErrPhoneRegistered = errors.New("phone already registered")
@@ -203,4 +205,27 @@ func (s *Service) PayFromFavorite(favoriteID string) (*types.Payment, error) {
 
 	return favorite, nil
 
+}
+
+func (s *Service) ExportToFile(path string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			log.Print(cerr)
+		}
+	}()
+
+	for _, acc := range s.accounts {
+		accountStr := strconv.FormatInt(acc.ID, 10) + ";" + acc.Phone.String() + ";" + acc.Balance.String() + "\n"
+
+		_, err = file.WriteString(accountStr)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
